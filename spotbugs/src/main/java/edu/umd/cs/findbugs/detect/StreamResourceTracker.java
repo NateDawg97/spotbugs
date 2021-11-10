@@ -244,16 +244,19 @@ public class StreamResourceTracker implements ResourceTracker<Stream> {
         // if present. Note that we don't care about preexisting
         // resources here.
         if (resourceCollection != null) {
+            System.out.println("Getting existing collection");
             return resourceCollection.getCreatedResource(new Location(handle, basicBlock));
         }
 
         Instruction ins = handle.getInstruction();
         if (!(ins instanceof TypedInstruction)) {
+            System.out.println("INSTRUCITON HANDLE not instance of typed instruction");
             return null;
         }
 
         Type type = ((TypedInstruction) ins).getType(cpg);
         if (!(type instanceof ObjectType)) {
+            System.out.println("CPG not instance of objecttype");
             return null;
         }
 
@@ -262,11 +265,14 @@ public class StreamResourceTracker implements ResourceTracker<Stream> {
         // All StreamFactories are given an opportunity to
         // look at the location and possibly identify a created stream.
         for (StreamFactory aStreamFactoryList : streamFactoryList) {
+            //System.out.println("WHAT? " + type + location);
             Stream stream = aStreamFactoryList.createStream(location, (ObjectType) type, cpg, lookupFailureCallback);
             if (stream != null) {
                 return stream;
             }
         }
+
+        System.out.println("NO Stream");
 
         return null;
     }

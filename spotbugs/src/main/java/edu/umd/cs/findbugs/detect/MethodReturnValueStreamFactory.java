@@ -107,6 +107,7 @@ public class MethodReturnValueStreamFactory implements StreamFactory {
             // For now, just support instance methods
             short opcode = ins.getOpcode();
             if (!invokeOpcodeSet.get(opcode)) {
+                System.out.println("not invoke opcode set - instance methods");
                 return null;
             }
 
@@ -116,6 +117,7 @@ public class MethodReturnValueStreamFactory implements StreamFactory {
             InvokeInstruction inv = (InvokeInstruction) ins;
             ReferenceType classType = inv.getReferenceType(cpg);
             if (!Hierarchy.isSubtype(classType, baseClassType)) {
+                System.out.println("not hierarchy subtype");
                 return null;
             }
 
@@ -123,6 +125,7 @@ public class MethodReturnValueStreamFactory implements StreamFactory {
             String methodName = inv.getMethodName(cpg);
             String methodSig = inv.getSignature(cpg);
             if (!this.methodName.equals(methodName) || !this.methodSig.equals(methodSig)) {
+                System.out.println("methodname != signature : " + methodName + " : sig - " + methodSig);
                 return null;
             }
 
@@ -132,6 +135,8 @@ public class MethodReturnValueStreamFactory implements StreamFactory {
             }
             Stream result = new Stream(location, streamClass, streamClass).setIgnoreImplicitExceptions(true).setIsOpenOnCreation(
                     true);
+            System.out.println("POTENTIAL STREAM");
+
             if (!isUninteresting) {
                 result.setInteresting(bugType);
             }

@@ -64,7 +64,7 @@ import edu.umd.cs.findbugs.ba.ResourceValueFrame;
  * @author Agustin Toribio atomo@arrakis.es
  */
 public final class FindOpenStream extends ResourceTrackingDetector<Stream, StreamResourceTracker> implements StatelessDetector {
-    static final boolean DEBUG = SystemProperties.getBoolean("fos.debug");
+    static final boolean DEBUG = true; // SystemProperties.getBoolean("fos.debug");
 
     static final boolean IGNORE_WRAPPED_UNINTERESTING_STREAMS = !SystemProperties.getBoolean("fos.allowWUS");
 
@@ -444,6 +444,8 @@ public final class FindOpenStream extends ResourceTrackingDetector<Stream, Strea
         // (and aren't in an equivalence class with another stream
         // that was closed).
         for (PotentialOpenStream pos : potentialOpenStreamList) {
+            System.out.println("stream: " + pos.toString());
+
             Stream stream = pos.stream;
             if (stream.isClosed()) {
                 // Stream was in an equivalence class with another

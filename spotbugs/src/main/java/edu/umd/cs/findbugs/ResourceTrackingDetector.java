@@ -52,7 +52,7 @@ import edu.umd.cs.findbugs.log.Profiler;
 public abstract class ResourceTrackingDetector<Resource, ResourceTrackerType extends ResourceTracker<Resource>> implements
         Detector {
 
-    private static final boolean DEBUG = SystemProperties.getBoolean("rtd.debug");
+    private static final boolean DEBUG = true; // SystemProperties.getBoolean("rtd.debug");
 
     private static final String DEBUG_METHOD_NAME = SystemProperties.getProperty("rtd.method");
 
@@ -103,11 +103,13 @@ public abstract class ResourceTrackingDetector<Resource, ResourceTrackerType ext
                 boolean mightClose = mightCloseResource(classContext, method, resourceTracker);
 
                 if (!prescreen(classContext, method, mightClose)) {
+                    System.out.println("MIGHT CLOSE");
                     continue;
                 }
 
                 ResourceCollection<Resource> resourceCollection = buildResourceCollection(classContext, method, resourceTracker);
                 if (resourceCollection.isEmpty()) {
+                    System.out.println("RESOURCE COLLECTION IS EMPTY");
                     continue;
                 }
 
@@ -132,6 +134,7 @@ public abstract class ResourceTrackingDetector<Resource, ResourceTrackerType ext
 
         for (Iterator<Location> i = cfg.locationIterator(); i.hasNext();) {
             Location location = i.next();
+            System.out.println("HOWDY");
             Resource resource = resourceTracker.isResourceCreation(location.getBasicBlock(), location.getHandle(), cpg);
             if (resource != null) {
                 resourceCollection.addCreatedResource(location, resource);
@@ -163,6 +166,7 @@ public abstract class ResourceTrackingDetector<Resource, ResourceTrackerType ext
 
         MethodGen methodGen = classContext.getMethodGen(method);
         if (methodGen == null) {
+            System.out.println("METHOD GEN IS NULL");
             return;
         }
         try {
