@@ -64,27 +64,50 @@ public class FormatStringChecker extends OpcodeStackDetector {
      */
     @Override
     public void sawOpcode(int seen) {
-        // System.out.println(getPC() + " " + Const.getOpcodeName(seen) + " " + state);
+        System.out.println(getPC() + " " + Const.getOpcodeName(seen) + " " + state);
 
         if (stack.getStackDepth() < stackDepth) {
             state = FormatState.NONE;
             stackDepth = 0;
             arguments = null;
         }
+
+        //String cl2 = getClassConstantOperand();
+        //String nm2 = getNameConstantOperand();
+        //String sig2 = getSigConstantOperand();
+        //XMethod m2 = getXMethodOperand();
+
+        this.printOpCode(seen);
+        //System.out.println("Hello, CL: " + cl2 + ", NM: " + nm2 + ", SIG: " + sig2 + ", XM: " + m2);
+
         if (seen == Const.ANEWARRAY && stack.getStackDepth() >= 2) {
+            System.out.println("A New Array???");
             Object size = stack.getStackItem(0).getConstant();
             Object formatStr = stack.getStackItem(1).getConstant();
+
+            int tempStackDepth = stack.getStackDepth();
+
+            for (int i = 0; i < tempStackDepth; i++) {
+                System.out.println("\tStack Item: " + stack.getStackItem(i));
+            }
+
+            System.out.println("STACK DEPTH: " + stack.getStackDepth());
+
             if (size instanceof Integer && formatStr instanceof String) {
                 arguments = new OpcodeStack.Item[(Integer) size];
                 this.formatString = (String) formatStr;
+                System.out.println("SETTING READY_FOR_FORMAT: " + formatStr + ", " + size);
                 state = FormatState.READY_FOR_FORMAT;
                 stackDepth = stack.getStackDepth();
             }
         } else if (state == FormatState.READY_FOR_FORMAT && seen == Const.DUP) {
+            //System.out.println("Ready for Format???");
             state = FormatState.EXPECTING_ASSIGNMENT;
         } else if (state == FormatState.EXPECTING_ASSIGNMENT && stack.getStackDepth() == stackDepth + 3 && seen == Const.AASTORE) {
+            //System.out.println("Expecting Assignment???");
             Object pos = stack.getStackItem(1).getConstant();
             OpcodeStack.Item value = stack.getStackItem(0);
+
             if (pos instanceof Integer) {
                 int index = (Integer) pos;
                 if (index >= 0 && index < arguments.length) {
@@ -104,6 +127,9 @@ public class FormatStringChecker extends OpcodeStackDetector {
             String nm = getNameConstantOperand();
             String sig = getSigConstantOperand();
             XMethod m = getXMethodOperand();
+
+            System.out.println("Hello, CL: " + cl + ", NM: " + nm + ", SIG: " + sig);
+
             if ((m == null || m.isVarArgs())
                     && sig.indexOf("Ljava/lang/String;[Ljava/lang/Object;)") >= 0
                     && ("java/util/Formatter".equals(cl) && "format".equals(nm) || "java/lang/String".equals(cl)
@@ -113,6 +139,7 @@ public class FormatStringChecker extends OpcodeStackDetector {
                                             && nm.endsWith("fmt")) {
 
                 if (formatString.indexOf('\n') >= 0) {
+                    //System.out.println("POOP!!!");
                     bugReporter.reportBug(new BugInstance(this, "VA_FORMAT_STRING_USES_NEWLINE", NORMAL_PRIORITY)
                             .addClassAndMethod(this).addCalledMethod(this).addString(formatString)
                             .describe(StringAnnotation.FORMAT_STRING_ROLE).addSourceLine(this));
